@@ -26,4 +26,4 @@ jobs:
             -v "${{ github.workspace }}:/workspace" \
             -w /workspace \
             ghcr.io/ivanklee86/devcontainer/go:1.26 \
-            bash -c 'task install && task lint && task test-ci'
+            bash -lc 'task install && task lint && task test-ci'
