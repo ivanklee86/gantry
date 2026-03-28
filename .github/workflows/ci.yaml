@@ -1,0 +1,29 @@
+name: CI
+
+on:
+  pull_request:
+    branches:
+      - main
+  push:
+    branches:
+      - main
+
+permissions:
+  contents: read
+
+jobs:
+  continuous-integration:
+    name: Continuous Integration
+    runs-on: ubuntu-latest
+    container:
+      image: ghcr.io/ivanklee86/devcontainer/go:1.26
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Run CI tasks
+        run: |
+          task install
+          task lint
+          task test-ci
