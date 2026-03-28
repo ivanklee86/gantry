@@ -25,6 +25,6 @@ func New() *Gantry {
 	return &Gantry{
 		Config: &config,
 		Out:    os.Stdout,
-		Err:    os.Stdin,
+		Err:    os.Stderr,
 	}
 }

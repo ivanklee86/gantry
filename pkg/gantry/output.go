@@ -12,7 +12,7 @@ const (
 	headerPrefix = "gantry"
 )
 
-// printToStream prints a generic message to a stream (stdout/stderror) in color.
+// printToStream prints a generic message to the provided stream (for example, stdout or stderr).
 func printToStream(stream io.Writer, msg interface{}) {
 	_, err := fmt.Fprintf(stream, "%v\n", msg)
 	if err != nil {
@@ -38,9 +38,9 @@ func (gantry Gantry) Output(msg interface{}) {
 	printToStream(gantry.Out, msg)
 }
 
-// Error pritns an error to stderr and exits with error code 1.
+// Error prints an error to stderr and exits with error code 1.
 func (gantry Gantry) Error(msg interface{}) {
-	printToStreamWithColor(gantry.Err, text.FgHiRed, fmt.Sprintf("Error: %v\n", msg))
+	printToStreamWithColor(gantry.Err, text.FgHiRed, fmt.Sprintf("Error: %v", msg))
 	if !gantry.NoExitCode {
 		os.Exit(1)
 	}

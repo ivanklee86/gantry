@@ -1,7 +1,7 @@
 version: '3'
 
 vars:
-  BINARY: colorguard
+  BINARY: gantry
   BUILD_DIR: bin
   TEST_REPORT: tests.xml
   COVERAGE_RAW: coverage.out
@@ -19,7 +19,7 @@ tasks:
   install:
     desc: Installs Golang dependencies and testing tools.
     cmds:
-      - go get ./...
+      - go mod download ./...
 
   install-ci:
     desc: Install packages and CI/CD tools.
@@ -29,10 +29,10 @@ tasks:
       - go install github.com/golangci/golangci-lint/cmd/golangci-lint@latest
   
   build:
-    desc: Builds bouncer binary.
+    desc: Builds colorguard binary.
     cmds:
-      - mkdir {{.BUILD_DIR}} | true
-      - go build -ldflags "-X main.version=${VERSION}" -o {{.BUILD_DIR}} ./...
+      - mkdir -p {{.BUILD_DIR}}
+      - go build -ldflags "-X main.version=${VERSION}" -o {{.BUILD_DIR}}/{{.BINARY}} .
 
   fmt:
     desc: Formats Golang code.
@@ -52,5 +52,5 @@ tasks:
   test-ci:
     desc: Run Golang tests and generate coverage report.
     cmds:
-      - go test --coverprofile {{.COVERAGE_RAW}} -v ./... 2>&1  | go-junit-report > report.xml
+      - go test -coverprofile {{.COVERAGE_RAW}} -v ./... 2>&1  | go-junit-report > {{.TEST_REPORT}}
       - go tool cover -html={{.COVERAGE_RAW}} -o {{.COVERAGE_REPORT}}

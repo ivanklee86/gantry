@@ -77,19 +77,37 @@ func initializeConfig(cmd *cobra.Command) error {
 }
 
 func bindFlags(cmd *cobra.Command, v *viper.Viper) {
-	cmd.Flags().VisitAll(func(f *pflag.Flag) {
-		if strings.Contains(f.Name, "-") {
-			envVarSuffix := strings.ToUpper(strings.ReplaceAll(f.Name, "-", "_"))
-			if err := v.BindEnv(f.Name, fmt.Sprintf("%s_%s", envPrefix, envVarSuffix)); err != nil {
-				os.Exit(1)
-			}
+	processed := make(map[string]struct{})
+
+	processFlagSet := func(fs *pflag.FlagSet) {
+		if fs == nil {
+			return
 		}
 
-		if !f.Changed && v.IsSet(f.Name) {
-			val := v.Get(f.Name)
-			if err := cmd.Flags().Set(f.Name, fmt.Sprintf("%v", val)); err != nil {
-				os.Exit(1)
+		fs.VisitAll(func(f *pflag.Flag) {
+			// Avoid processing the same flag multiple times if it appears in more than one FlagSet.
+			if _, ok := processed[f.Name]; ok {
+				return
 			}
-		}
-	})
+			processed[f.Name] = struct{}{}
+
+			if strings.Contains(f.Name, "-") {
+				envVarSuffix := strings.ToUpper(strings.ReplaceAll(f.Name, "-", "_"))
+				if err := v.BindEnv(f.Name, fmt.Sprintf("%s_%s", envPrefix, envVarSuffix)); err != nil {
+					os.Exit(1)
+				}
+			}
+
+			if !f.Changed && v.IsSet(f.Name) {
+				val := v.Get(f.Name)
+				if err := fs.Set(f.Name, fmt.Sprintf("%v", val)); err != nil {
+					os.Exit(1)
+				}
+			}
+		})
+	}
+
+	processFlagSet(cmd.Flags())
+	processFlagSet(cmd.PersistentFlags())
+	processFlagSet(cmd.InheritedFlags())
 }
