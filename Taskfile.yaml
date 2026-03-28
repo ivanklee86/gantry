@@ -19,7 +19,7 @@ tasks:
   install:
     desc: Installs Golang dependencies and testing tools.
     cmds:
-      - go mod download ./...
+      - go get ./...
 
   install-ci:
     desc: Install packages and CI/CD tools.
