@@ -34,7 +34,7 @@ jobs:
       uses: arduino/setup-task@v2
     - name: Install all dependencies
       run: |
-        task install
+        task install-ci
     - name: Lint
       run: |
         task lint
