@@ -13,33 +13,38 @@ permissions:
 jobs:
   test:
     runs-on: ubuntu-latest
-    container:
-      image: ghcr.io/ivanklee86/devcontainer/go:1.26
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-      - name: Run all CI tasks
-        run: |
-          task install-ci
-          task lint
-          task test-ci
-      - name: Publish Unit Test Results
-        uses: EnricoMi/publish-unit-test-result-action@v2
-        if: always()
-        with:
-          files: report.xml
-      - name: Generate lcov coverage report
-        uses: jandelgado/gcov2lcov-action@v1.1.0
-        if: always()
-      - name: Coveralls
-        uses: coverallsapp/github-action@master
-        if: always()
-        with:
-          github-token: ${{ secrets.GITHUB_TOKEN }}
-          path-to-lcov: coverage.lcov
-      - name: Save artifacts
-        uses: actions/upload-artifact@v4
-        if: always()
-        with:
-          name: Coverage report
-          path: ./coverage.html
+    - name: Install Go
+      uses: actions/setup-go@v6
+      with:
+        go-version: 1.26
+    - name: Checkout code
+      uses: actions/checkout@v6
+    - uses: actions/cache@v6
+      with:
+        path: |
+          ~/go/pkg/mod
+          ~/.cache/go-build
+          ~/Library/Caches/go-build
+          %LocalAppData%\go-build
+        key: ${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}
+        restore-keys: |
+          ${{ runner.os }}-go-
+    - name: Install Task
+      uses: arduino/setup-task@v3
+    - name: Install all dependencies
+      run: |
+        task install
+    - name: Lint
+      run: |
+        task lint
+    - name: Run tests.
+      run: |
+        task test
+    - name: Generate lcov coverage report.
+      uses: jandelgado/gcov2lcov-action@v2.3.0
+    # - name: Coveralls 
+    #   uses: coverallsapp/github-action@master
+    #   with:
+    #     github-token: ${{ secrets.GITHUB_TOKEN }}
+    #     path-to-lcov: coverage.lcov
