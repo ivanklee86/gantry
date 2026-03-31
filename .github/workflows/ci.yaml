@@ -1,0 +1,48 @@
+name: CI
+
+on:
+  push:
+    branches:
+      - 'main'
+  pull_request:
+
+permissions:
+  checks: write
+  pull-requests: write
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Install Go
+      uses: actions/setup-go@v6
+      with:
+        go-version: 1.26
+    - name: Checkout code
+      uses: actions/checkout@v6
+    - uses: actions/cache@v5
+      with:
+        path: |
+          ~/go/pkg/mod
+          ~/.cache/go-build
+          ~/Library/Caches/go-build
+          %LocalAppData%\go-build
+        key: ${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}
+        restore-keys: |
+          ${{ runner.os }}-go-
+    - name: Install Task
+      uses: arduino/setup-task@v2
+    - name: Install all dependencies
+      run: |
+        task install-ci
+    - name: Lint
+      run: |
+        task lint
+    - name: Run tests.
+      run: |
+        task test
+    # - name: Coveralls 
+    #   uses: coverallsapp/github-action@master
+    #   with:
+    #     github-token: ${{ secrets.GITHUB_TOKEN }}
+    #     path-to-lcov: coverage.lcov
