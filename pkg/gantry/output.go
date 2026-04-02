@@ -37,7 +37,7 @@ func (gantry Gantry) Output(msg interface{}) {
 	printToStream(gantry.Out, msg)
 }
 
-// Error prints an error to stderr.
+// Error prints an error to the configured error writer.
 func (gantry Gantry) Error(msg interface{}) {
 	printToStreamWithColor(gantry.Err, text.FgHiRed, fmt.Sprintf("Error: %v", msg))
 }
