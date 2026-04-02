@@ -3,7 +3,6 @@ package gantry
 import (
 	"fmt"
 	"io"
-	"os"
 
 	"github.com/jedib0t/go-pretty/v6/text"
 )
@@ -38,10 +37,7 @@ func (gantry Gantry) Output(msg interface{}) {
 	printToStream(gantry.Out, msg)
 }
 
-// Error prints an error to stderr and exits with error code 1.
+// Error prints an error to stderr.
 func (gantry Gantry) Error(msg interface{}) {
 	printToStreamWithColor(gantry.Err, text.FgHiRed, fmt.Sprintf("Error: %v", msg))
-	if !gantry.NoExitCode {
-		os.Exit(1)
-	}
 }
