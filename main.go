@@ -31,7 +31,8 @@ func main() {
 }
 
 func NewRootCommand() *cobra.Command {
-	gantry := gantry.New()
+	g := gantry.New()
+	var v *viper.Viper
 
 	cmd := &cobra.Command{
 		Use:     "gantry",
@@ -39,25 +40,25 @@ func NewRootCommand() *cobra.Command {
 		Long:    "A CLI to enforce minimum versions for packages in CI/CD.",
 		Version: version,
 		PersistentPreRunE: func(cmd *cobra.Command, args []string) error {
-			gantry.Out = cmd.OutOrStdout()
-			gantry.Err = cmd.ErrOrStderr()
+			g.Out = cmd.OutOrStdout()
+			g.Err = cmd.ErrOrStderr()
 
-			return initializeConfig(cmd)
+			var err error
+			v, err = initializeConfig(cmd)
+			return err
 		},
-		Run: func(cmd *cobra.Command, args []string) {
-			_, err := fmt.Fprint(gantry.Out, cmd.UsageString())
-			if err != nil {
-				gantry.Error(err)
-			}
+		RunE: func(cmd *cobra.Command, args []string) error {
+			_, err := fmt.Fprint(g.Out, cmd.UsageString())
+			return err
 		},
 	}
 
-	cmd.PersistentFlags().BoolVar(&gantry.NoExitCode, "no-exit-on-fail", false, "Don't return a non-zero exit code on failure.")
+	_ = v // available to subcommand closures added via cmd.AddCommand
 
 	return cmd
 }
 
-func initializeConfig(cmd *cobra.Command) error {
+func initializeConfig(cmd *cobra.Command) (*viper.Viper, error) {
 	v := viper.New()
 
 	v.SetConfigName(defaultConfigFilename)
@@ -65,26 +66,34 @@ func initializeConfig(cmd *cobra.Command) error {
 
 	if err := v.ReadInConfig(); err != nil {
 		if _, ok := err.(viper.ConfigFileNotFoundError); !ok {
-			return err
+			return nil, err
 		}
 	}
 
 	v.SetEnvPrefix(envPrefix)
 	v.AutomaticEnv()
-	bindFlags(cmd, v)
 
-	return nil
+	if err := bindFlags(cmd, v); err != nil {
+		return nil, err
+	}
+
+	return v, nil
 }
 
-func bindFlags(cmd *cobra.Command, v *viper.Viper) {
+func bindFlags(cmd *cobra.Command, v *viper.Viper) error {
+	var bindErr error
 	processed := make(map[string]struct{})
 
 	processFlagSet := func(fs *pflag.FlagSet) {
-		if fs == nil {
+		if fs == nil || bindErr != nil {
 			return
 		}
 
 		fs.VisitAll(func(f *pflag.Flag) {
+			if bindErr != nil {
+				return
+			}
+
 			// Avoid processing the same flag multiple times if it appears in more than one FlagSet.
 			if _, ok := processed[f.Name]; ok {
 				return
@@ -94,14 +103,15 @@ func bindFlags(cmd *cobra.Command, v *viper.Viper) {
 			if strings.Contains(f.Name, "-") {
 				envVarSuffix := strings.ToUpper(strings.ReplaceAll(f.Name, "-", "_"))
 				if err := v.BindEnv(f.Name, fmt.Sprintf("%s_%s", envPrefix, envVarSuffix)); err != nil {
-					os.Exit(1)
+					bindErr = err
+					return
 				}
 			}
 
 			if !f.Changed && v.IsSet(f.Name) {
 				val := v.Get(f.Name)
 				if err := fs.Set(f.Name, fmt.Sprintf("%v", val)); err != nil {
-					os.Exit(1)
+					bindErr = err
 				}
 			}
 		})
@@ -110,4 +120,6 @@ func bindFlags(cmd *cobra.Command, v *viper.Viper) {
 	processFlagSet(cmd.Flags())
 	processFlagSet(cmd.PersistentFlags())
 	processFlagSet(cmd.InheritedFlags())
+
+	return bindErr
 }
