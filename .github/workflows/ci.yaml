@@ -40,7 +40,10 @@ jobs:
         task lint
     - name: Run tests.
       run: |
-        task test
+        task test-ci
+    - name: Run integration tests.
+      run: |
+        task integration-test-ci
     # - name: Coveralls 
     #   uses: coverallsapp/github-action@master
     #   with:
