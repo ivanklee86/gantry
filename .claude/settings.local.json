@@ -7,7 +7,9 @@
       "Read(//home/vscode/go/pkg/mod/github.com/google/**)",
       "WebFetch(domain:raw.githubusercontent.com)",
       "Bash(go test:*)",
-      "Bash(GANTRY_INTEGRATION_TESTS=1 go test -v -run Integration ./pkg/merge/... 2>&1)"
+      "Bash(GANTRY_INTEGRATION_TESTS=1 go test -v -run Integration ./pkg/merge/... 2>&1)",
+      "Bash(go list:*)",
+      "Bash(go mod:*)"
     ]
   }
 }

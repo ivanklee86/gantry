@@ -1,0 +1,1 @@
+- [Gantry Security Architecture](project_security_arch.md) — threat model: Jsonnet merge pipeline, path injection via f.Path, MemoryImporter scope, no resource limits

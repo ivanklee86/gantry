@@ -37,7 +37,7 @@ func TestMerge_JSONandJsonnet(t *testing.T) {
 	var out map[string]interface{}
 	require.NoError(t, json.Unmarshal(result, &out))
 	assert.Equal(t, "myapp", out["name"])
-	assert.Equal(t, float64(5), out["version"]) // std.length("hello") == 5, not a string
+	assert.Equal(t, float64(5), out["version"]) // std.length("hello") == 5
 }
 
 func TestMerge_ThreeFiles(t *testing.T) {
@@ -57,7 +57,11 @@ func TestMerge_ThreeFiles(t *testing.T) {
 	assert.Equal(t, float64(2), out["w"])
 }
 
-func TestMerge_DeepMerge(t *testing.T) {
+// TestMerge_JsonnetHiddenConcatProducesDeepMerge verifies that when an overlay
+// Jsonnet file uses the +: operator on a nested object, the nested object is
+// merged rather than replaced. Note that it is the +: in the Jsonnet overlay
+// that drives deep merging — Merge itself only applies the top-level + operator.
+func TestMerge_JsonnetHiddenConcatProducesDeepMerge(t *testing.T) {
 	files := []git.FileContent{
 		{Path: "base.json", Content: []byte(`{"settings": {"a": 1, "b": 2}}`)},
 		{Path: "overlay.jsonnet", Content: []byte(`{ settings+: { b: 99, c: 3 } }`)},
@@ -67,8 +71,9 @@ func TestMerge_DeepMerge(t *testing.T) {
 
 	var out map[string]interface{}
 	require.NoError(t, json.Unmarshal(result, &out))
+	require.IsType(t, map[string]interface{}{}, out["settings"], "settings must be an object")
 	settings := out["settings"].(map[string]interface{})
-	assert.Equal(t, float64(1), settings["a"])  // base key survived
+	assert.Equal(t, float64(1), settings["a"])  // base key survived (due to +: in overlay)
 	assert.Equal(t, float64(99), settings["b"]) // overlay wins
 	assert.Equal(t, float64(3), settings["c"])  // overlay added
 }
@@ -80,6 +85,7 @@ func TestMerge_InvalidJsonnet(t *testing.T) {
 	}
 	_, err := merge.Merge(files)
 	assert.Error(t, err)
+	assert.ErrorContains(t, err, "jsonnet evaluation")
 }
 
 func TestMerge_TooFewFiles(t *testing.T) {
@@ -110,16 +116,27 @@ func TestMerge_DuplicatePaths(t *testing.T) {
 	assert.Error(t, err)
 }
 
-func TestMerge_OutputIsValidJSON(t *testing.T) {
-	files := []git.FileContent{
-		{Path: "a.json", Content: []byte(`{"x": 1}`)},
-		{Path: "b.json", Content: []byte(`{"y": 2}`)},
+func TestMerge_InvalidPath(t *testing.T) {
+	tests := []struct {
+		name string
+		path string
+	}{
+		{"single quote injection", "a'.json"},
+		{"double quote injection", `a".json`},
+		{"backslash injection", `a\.json`},
+		{"snippet injection", "a') + {} + (import \"b"},
 	}
-	result, err := merge.Merge(files)
-	require.NoError(t, err)
-
-	var out interface{}
-	assert.NoError(t, json.Unmarshal(result, &out))
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			files := []git.FileContent{
+				{Path: "base.json", Content: []byte(`{"x": 1}`)},
+				{Path: tt.path, Content: []byte(`{"y": 2}`)},
+			}
+			_, err := merge.Merge(files)
+			assert.Error(t, err)
+			assert.ErrorContains(t, err, "invalid path characters")
+		})
+	}
 }
 
 func TestIntegration_Merge_DevcontainerWithJsonnetOverlay(t *testing.T) {
@@ -149,8 +166,12 @@ func TestIntegration_Merge_DevcontainerWithJsonnetOverlay(t *testing.T) {
 	assert.Equal(t, "python-base", out["name"])
 	assert.Equal(t, "vscode", out["remoteUser"])
 
-	// Overlay added new extensions while base extensions survived (deep merge).
-	vscode := out["customizations"].(map[string]interface{})["vscode"].(map[string]interface{})
+	// Overlay added new extensions while base extensions survived (via +: in overlay).
+	require.IsType(t, map[string]interface{}{}, out["customizations"], "customizations must be an object")
+	customizations := out["customizations"].(map[string]interface{})
+	require.IsType(t, map[string]interface{}{}, customizations["vscode"], "vscode must be an object")
+	vscode := customizations["vscode"].(map[string]interface{})
+	require.IsType(t, []interface{}{}, vscode["extensions"], "extensions must be an array")
 	exts := vscode["extensions"].([]interface{})
 	extStrings := make([]string, len(exts))
 	for i, e := range exts {
@@ -161,6 +182,7 @@ func TestIntegration_Merge_DevcontainerWithJsonnetOverlay(t *testing.T) {
 	assert.Contains(t, extStrings, "ms-python.python") // from base, survived
 
 	// Overlay added new postCreateCommand while base command survived.
+	require.IsType(t, map[string]interface{}{}, out["postCreateCommand"], "postCreateCommand must be an object")
 	cmds := out["postCreateCommand"].(map[string]interface{})
 	assert.Contains(t, cmds, "install-deps") // from base
 	assert.Contains(t, cmds, "install-prek") // from overlay
