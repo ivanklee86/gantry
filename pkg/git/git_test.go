@@ -1,6 +1,7 @@
 package git
 
 import (
+	"os"
 	"testing"
 
 	"github.com/go-git/go-billy/v6/memfs"
@@ -47,15 +48,57 @@ func TestBuildAuth_HTTP_Token_TakesPrecedence(t *testing.T) {
 }
 
 func TestBuildAuth_SSH_Agent(t *testing.T) {
+	if os.Getenv("SSH_AUTH_SOCK") == "" {
+		t.Skip("SSH_AUTH_SOCK not set — no SSH agent available")
+	}
 	auth, err := buildAuth(CloneOptions{URL: "git@github.com:org/repo.git"})
 	require.NoError(t, err)
 	assert.IsType(t, &ssh.PublicKeysCallback{}, auth)
 }
 
 func TestBuildAuth_SSH_Scheme_Agent(t *testing.T) {
+	if os.Getenv("SSH_AUTH_SOCK") == "" {
+		t.Skip("SSH_AUTH_SOCK not set — no SSH agent available")
+	}
 	auth, err := buildAuth(CloneOptions{URL: "ssh://git@github.com/org/repo.git"})
 	require.NoError(t, err)
 	assert.IsType(t, &ssh.PublicKeysCallback{}, auth)
+}
+
+func TestValidateURL_Allowed(t *testing.T) {
+	for _, u := range []string{
+		"https://github.com/org/repo.git",
+		"http://internal.example.com/repo.git",
+		"ssh://git@github.com/org/repo.git",
+		"git@github.com:org/repo.git",
+	} {
+		assert.NoError(t, validateURL(u), "expected %q to be allowed", u)
+	}
+}
+
+func TestValidateURL_Rejected(t *testing.T) {
+	for _, u := range []string{
+		"file:///etc/passwd",
+		"file://localhost/home/user/repo",
+		"git://github.com/org/repo.git",
+		"ftp://example.com/repo",
+	} {
+		assert.Error(t, validateURL(u), "expected %q to be rejected", u)
+	}
+}
+
+func TestCloneOptions_String_RedactsCredentials(t *testing.T) {
+	opts := CloneOptions{
+		URL:            "https://github.com/org/repo.git",
+		Token:          "secret-token",
+		Password:       "secret-pass",
+		SSHKeyPassword: "secret-key-pass",
+	}
+	s := opts.String()
+	assert.NotContains(t, s, "secret-token")
+	assert.NotContains(t, s, "secret-pass")
+	assert.NotContains(t, s, "secret-key-pass")
+	assert.Contains(t, s, "***")
 }
 
 func TestGetFiles_Success(t *testing.T) {
@@ -64,7 +107,7 @@ func TestGetFiles_Success(t *testing.T) {
 	require.NoError(t, err)
 	_, err = f.Write([]byte("world"))
 	require.NoError(t, err)
-	f.Close()
+	require.NoError(t, f.Close())
 
 	repo := &inMemoryRepository{fs: fs}
 	files, err := repo.GetFiles([]string{"hello.txt"})
@@ -88,6 +131,10 @@ func TestGetFiles_MissingFile(t *testing.T) {
 }
 
 func TestIntegration_Clone_HTTPS_Public(t *testing.T) {
+	if os.Getenv("GANTRY_INTEGRATION_TESTS") == "" {
+		t.Skip("set GANTRY_INTEGRATION_TESTS=1 to run integration tests")
+	}
+
 	repo, err := Clone(CloneOptions{
 		URL: "https://github.com/ivanklee86/devcontainers",
 	}, nil)
