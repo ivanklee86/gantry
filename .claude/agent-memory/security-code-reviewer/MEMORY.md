@@ -1,0 +1,1 @@
+- [Git module security architecture](project_git_module.md) — path traversal, credential redaction gaps, alpha dependency, and containment-check absence in pkg/git/git.go
