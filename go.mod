@@ -15,6 +15,11 @@ require (
 )
 
 require (
+	github.com/google/go-jsonnet v0.22.0
+	gopkg.in/yaml.v3 v3.0.1
+)
+
+require (
 	github.com/Microsoft/go-winio v0.6.2 // indirect
 	github.com/ProtonMail/go-crypto v1.4.1 // indirect
 	github.com/cloudflare/circl v1.6.3 // indirect
@@ -44,5 +49,5 @@ require (
 	golang.org/x/sync v0.19.0 // indirect
 	golang.org/x/sys v0.43.0 // indirect
 	golang.org/x/text v0.34.0 // indirect
-	gopkg.in/yaml.v3 v3.0.1 // indirect
+	sigs.k8s.io/yaml v1.4.0 // indirect
 )

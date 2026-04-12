@@ -7,6 +7,7 @@ import (
 
 	"github.com/spf13/pflag"
 
+	"github.com/ivanklee86/gantry/cmd/build"
 	"github.com/ivanklee86/gantry/pkg/gantry"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
@@ -52,6 +53,8 @@ func NewRootCommand() *cobra.Command {
 			return err
 		},
 	}
+
+	cmd.AddCommand(build.NewBuildCommand(g))
 
 	_ = v // available to subcommand closures added via cmd.AddCommand
 
