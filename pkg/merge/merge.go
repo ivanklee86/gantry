@@ -16,12 +16,12 @@ var safePath = regexp.MustCompile(`^[a-zA-Z0-9_\-./]+$`)
 
 const maxOutputBytes = 10 * 1024 * 1024 // 10 MB
 
-// Merge evaluates two or more FileContent values and merges them using
+// Merge evaluates one or more FileContent values and merges them using
 // Jsonnet's + operator applied left-to-right, returning canonical JSON.
 //
 // Files may be plain JSON (.json) or Jsonnet (.jsonnet); both are valid
 // Jsonnet. Each file is identified by its Path field, which is used as the
-// virtual import key. At least two FileContent values must be provided.
+// virtual import key. At least one FileContent value must be provided.
 //
 // Merge performs a shallow top-level merge: right-hand fields overwrite
 // left-hand fields at the top level. Deep merging of nested objects requires
@@ -31,8 +31,8 @@ const maxOutputBytes = 10 * 1024 * 1024 // 10 MB
 // real filesystem or network — only paths provided in files are importable.
 // Error values may contain caller-supplied path strings.
 func Merge(files []git.FileContent) ([]byte, error) {
-	if len(files) < 2 {
-		return nil, fmt.Errorf("merge requires at least 2 files, got %d", len(files))
+	if len(files) == 0 {
+		return nil, fmt.Errorf("merge requires at least 1 file, got 0")
 	}
 
 	data := make(map[string]jsonnet.Contents, len(files))
@@ -72,5 +72,5 @@ func Merge(files []git.FileContent) ([]byte, error) {
 		return nil, fmt.Errorf("merged output exceeds maximum allowed size (%d bytes)", maxOutputBytes)
 	}
 
-	return []byte(strings.TrimRight(result, "\n")), nil
+	return []byte(strings.TrimSuffix(result, "\n")), nil
 }

@@ -11,7 +11,7 @@ import (
 
 	"github.com/ivanklee86/gantry/pkg/config"
 	"github.com/ivanklee86/gantry/pkg/git"
-	"github.com/ivanklee86/gantry/pkg/merger"
+	"github.com/ivanklee86/gantry/pkg/merge"
 )
 
 // openRepoFunc is the function used by Build to open a repository.
@@ -29,7 +29,7 @@ func (g *Gantry) Build(_ context.Context, cfg config.BuildConfig) error {
 	}
 	printToStreamWithColor(g.Err, text.FgHiCyan, fmt.Sprintf("🚀 Starting to build devcontainer with %d overlay(s) → %s", len(cfg.Overlays), target))
 
-	var allFiles []git.FileContent
+	var current []byte
 
 	for i, overlay := range cfg.Overlays {
 		printToStreamWithColor(g.Err, text.FgHiCyan, fmt.Sprintf("🔗 Overlay %d/%d: %s", i+1, len(cfg.Overlays), stripansi.Strip(overlay.Repo)))
@@ -44,13 +44,24 @@ func (g *Gantry) Build(_ context.Context, cfg config.BuildConfig) error {
 			return fmt.Errorf("overlay %d: get files: %w", i+1, err)
 		}
 
-		allFiles = append(allFiles, files...)
+		batch := make([]git.FileContent, 0, 1+len(files))
+		if current != nil {
+			batch = append(batch, git.FileContent{Path: ".gantry-base.json", Content: current})
+		}
+		batch = append(batch, files...)
+
+		result, err := merge.Merge(batch)
+		if err != nil {
+			if current != nil {
+				printToStreamWithColor(g.Err, text.FgHiYellow, fmt.Sprintf("⚠️  Last known good result (after overlay %d):", i))
+				printToStream(g.Err, string(current))
+			}
+			return fmt.Errorf("overlay %d (%s): merge failed: %w", i+1, stripansi.Strip(overlay.Repo), err)
+		}
+		current = result
 	}
 
-	merged, err := merger.Merge(allFiles)
-	if err != nil {
-		return fmt.Errorf("merge: %w", err)
-	}
+	merged := current
 
 	if cfg.Write {
 		if err := writeOutput(cfg.OutputPath, merged); err != nil {
@@ -58,7 +69,7 @@ func (g *Gantry) Build(_ context.Context, cfg config.BuildConfig) error {
 		}
 		printToStreamWithColor(g.Err, text.FgHiGreen, fmt.Sprintf("✅ Wrote %s", stripansi.Strip(cfg.OutputPath)))
 	} else {
-		g.Output(merged)
+		g.Output(string(merged))
 	}
 
 	return nil
@@ -96,9 +107,9 @@ func (g *Gantry) openRepo(o config.Overlay) (git.Repository, error) {
 }
 
 // writeOutput creates parent directories as needed and writes content to path.
-func writeOutput(path, content string) error {
-	if err := os.MkdirAll(filepath.Dir(path), 0o755); err != nil {
+func writeOutput(path string, content []byte) error {
+	if err := os.MkdirAll(filepath.Dir(path), 0o700); err != nil {
 		return fmt.Errorf("create output directory: %w", err)
 	}
-	return os.WriteFile(path, []byte(content), 0o644)
+	return os.WriteFile(path, content, 0o600)
 }

@@ -88,13 +88,35 @@ func TestMerge_InvalidJsonnet(t *testing.T) {
 	assert.ErrorContains(t, err, "jsonnet evaluation")
 }
 
-func TestMerge_TooFewFiles(t *testing.T) {
-	_, err := merge.Merge([]git.FileContent{})
-	assert.Error(t, err)
+func TestMerge_SingleFile_ReturnsFormatted(t *testing.T) {
+	files := []git.FileContent{
+		{Path: "base.json", Content: []byte(`{"name":"python","version":3}`)},
+	}
+	result, err := merge.Merge(files)
+	require.NoError(t, err)
 
-	_, err = merge.Merge([]git.FileContent{
-		{Path: "a.json", Content: []byte(`{"x": 1}`)},
-	})
+	var out map[string]interface{}
+	require.NoError(t, json.Unmarshal(result, &out))
+	assert.Equal(t, "python", out["name"])
+	assert.Equal(t, float64(3), out["version"])
+}
+
+func TestMerge_ImportFromPreloaded_Works(t *testing.T) {
+	files := []git.FileContent{
+		{Path: "base.json", Content: []byte(`{"name":"base"}`)},
+		{Path: "overlay.jsonnet", Content: []byte(`(import "base.json") + {"extra": true}`)},
+	}
+	result, err := merge.Merge(files)
+	require.NoError(t, err)
+
+	var out map[string]interface{}
+	require.NoError(t, json.Unmarshal(result, &out))
+	assert.Equal(t, "base", out["name"])
+	assert.Equal(t, true, out["extra"])
+}
+
+func TestMerge_NoFiles(t *testing.T) {
+	_, err := merge.Merge([]git.FileContent{})
 	assert.Error(t, err)
 }
 

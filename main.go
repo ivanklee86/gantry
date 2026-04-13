@@ -36,10 +36,12 @@ func NewRootCommand() *cobra.Command {
 	var v *viper.Viper
 
 	cmd := &cobra.Command{
-		Use:     "gantry",
-		Short:   "Enforce minimum versions in CI/CD.",
-		Long:    "A CLI to enforce minimum versions for packages in CI/CD.",
-		Version: version,
+		Use:           "gantry",
+		Short:         "Enforce minimum versions in CI/CD.",
+		Long:          "A CLI to enforce minimum versions for packages in CI/CD.",
+		Version:       version,
+		SilenceUsage:  true,
+		SilenceErrors: true,
 		PersistentPreRunE: func(cmd *cobra.Command, args []string) error {
 			g.Out = cmd.OutOrStdout()
 			g.Err = cmd.ErrOrStderr()

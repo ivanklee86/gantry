@@ -112,6 +112,9 @@ func CLIFlagsToConfig(f CLIFlags) (BuildConfig, error) {
 	if len(f.Files) == 0 {
 		return BuildConfig{}, fmt.Errorf("at least one --files entry is required")
 	}
+	if f.Write && f.OutputPath == "" {
+		return BuildConfig{}, fmt.Errorf("--output-path is required when --write is set")
+	}
 
 	cfg := BuildConfig{
 		Version:    1,
@@ -141,18 +144,28 @@ func Validate(cfg BuildConfig) error {
 	if cfg.Version != 1 {
 		return fmt.Errorf("unsupported config version %d: only version 1 is supported", cfg.Version)
 	}
+	if cfg.Write && cfg.OutputPath == "" {
+		return fmt.Errorf("--output-path is required when --write is set")
+	}
 	if len(cfg.Overlays) == 0 {
 		return fmt.Errorf("at least one overlay is required")
 	}
 	for i, o := range cfg.Overlays {
+		n := i + 1 // 1-based for user-facing messages
 		if o.Repo == "" {
-			return fmt.Errorf("overlay %d: repo is required", i)
+			return fmt.Errorf("overlay %d: repo is required", n)
 		}
 		if o.Ref != "" && o.Commit != "" {
-			return fmt.Errorf("overlay %d: ref and commit are mutually exclusive", i)
+			return fmt.Errorf("overlay %d: ref and commit are mutually exclusive", n)
 		}
 		if len(o.Files) == 0 {
-			return fmt.Errorf("overlay %d: at least one file is required", i)
+			return fmt.Errorf("overlay %d: at least one file is required", n)
+		}
+		if o.Subdirectory != "" {
+			cleaned := filepath.Clean(o.Subdirectory)
+			if filepath.IsAbs(cleaned) || strings.HasPrefix(cleaned, "..") {
+				return fmt.Errorf("overlay %d: subdirectory %q must not be absolute or escape the repository root", n, o.Subdirectory)
+			}
 		}
 	}
 	return nil

@@ -191,6 +191,26 @@ func TestBuild_GetFilesError_PropagatesError(t *testing.T) {
 	assert.Error(t, err)
 }
 
+func TestBuild_MergeError_ReportsOverlayIndex(t *testing.T) {
+	cfg := config.BuildConfig{
+		Version: 1,
+		Overlays: []config.Overlay{
+			{Repo: "fake1", Files: []string{"base.json"}},
+			{Repo: "fake2", Files: []string{"bad.jsonnet"}},
+			{Repo: "fake3", Files: []string{"extra.json"}},
+		},
+	}
+	repos := []*mockRepository{
+		{files: map[string][]byte{"base.json": []byte(`{"name":"base"}`)}},
+		{files: map[string][]byte{"bad.jsonnet": []byte(`{ broken syntax !!!`)}},
+		{files: map[string][]byte{"extra.json": []byte(`{"extra":true}`)}},
+	}
+
+	_, err := buildWithMocks(t, cfg, repos)
+	require.Error(t, err)
+	assert.ErrorContains(t, err, "overlay 2")
+}
+
 // --- Integration tests ---
 
 func TestIntegration_Build_LocalRepo_Stdout(t *testing.T) {

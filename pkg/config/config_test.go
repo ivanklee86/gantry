@@ -55,6 +55,17 @@ func TestValidate_MutualExclusion_RefAndCommit(t *testing.T) {
 	assert.Error(t, Validate(cfg))
 }
 
+func TestValidate_WriteWithoutOutputPath(t *testing.T) {
+	cfg := BuildConfig{
+		Version: 1,
+		Write:   true,
+		Overlays: []Overlay{
+			{Repo: "https://github.com/org/repo", Files: []string{"a.json"}},
+		},
+	}
+	assert.Error(t, Validate(cfg))
+}
+
 func TestValidate_EmptyFiles(t *testing.T) {
 	cfg := BuildConfig{
 		Version:  1,

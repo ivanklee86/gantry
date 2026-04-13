@@ -312,6 +312,9 @@ func isSSH(u string) bool {
 	return strings.HasPrefix(u, "git@") || strings.HasPrefix(u, "ssh://")
 }
 
+// maxFileBytes caps the size of a single file read from the repository.
+const maxFileBytes = 10 * 1024 * 1024 // 10 MB
+
 // GetFiles returns the contents of the given paths from the repository.
 // If a subdirectory was configured, it is prepended to each path when reading;
 // FileContent.Path always reflects the caller-supplied path.
@@ -339,11 +342,18 @@ func (r *inMemoryRepository) GetFiles(paths []string) ([]FileContent, error) {
 			if err != nil {
 				return nil, fmt.Errorf("open %s: %w", fullPath, err)
 			}
-			data, readErr := io.ReadAll(f)
+			limited := io.LimitReader(f, maxFileBytes+1)
+			data, readErr := io.ReadAll(limited)
 			if closeErr := f.Close(); closeErr != nil && readErr == nil {
 				return nil, fmt.Errorf("close %s: %w", fullPath, closeErr)
 			}
-			return data, readErr
+			if readErr != nil {
+				return nil, readErr
+			}
+			if int64(len(data)) > maxFileBytes {
+				return nil, fmt.Errorf("file %s exceeds maximum allowed size (%d bytes)", fullPath, maxFileBytes)
+			}
+			return data, nil
 		}()
 		if err != nil {
 			return nil, err

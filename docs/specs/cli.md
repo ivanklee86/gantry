@@ -7,6 +7,7 @@ It should:
 - Use `git-go` to clone repository into memory and extract files specified.
 - Use `go-jsonnet` to merge the files in specified order.
 - Write to `devcontainer.json` if `--write` is specified.
+- Have a human-friendly error message (eg merge a file at a time, then show error message).
 
 Notes:
 - Logging for humans should be handled in the `gantry` package itself.
