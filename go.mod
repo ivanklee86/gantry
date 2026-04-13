@@ -4,6 +4,7 @@ go 1.26.1
 
 require (
 	github.com/acarl005/stripansi v0.0.0-20180116102854-5a71ef0e047d
+	github.com/cyphar/filepath-securejoin v0.6.1
 	github.com/go-git/go-billy/v6 v6.0.0-20260410103409-85b6241850b5
 	github.com/go-git/go-git/v6 v6.0.0-alpha.1
 	github.com/google/go-jsonnet v0.22.0
@@ -18,7 +19,6 @@ require (
 	github.com/Microsoft/go-winio v0.6.2 // indirect
 	github.com/ProtonMail/go-crypto v1.4.1 // indirect
 	github.com/cloudflare/circl v1.6.3 // indirect
-	github.com/cyphar/filepath-securejoin v0.6.1 // indirect
 	github.com/davecgh/go-spew v1.1.1 // indirect
 	github.com/emirpasic/gods v1.18.1 // indirect
 	github.com/fsnotify/fsnotify v1.9.0 // indirect
