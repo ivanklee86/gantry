@@ -1,0 +1,1 @@
+- [Project conventions and architecture](project_conventions.md) — test tiers, task runner, go-jsonnet dependency, devcontainer fixture repo

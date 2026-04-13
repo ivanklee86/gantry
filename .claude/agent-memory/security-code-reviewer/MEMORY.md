@@ -1,1 +1,1 @@
-- [Git module security architecture](project_git_module.md) — path traversal, credential redaction gaps, alpha dependency, and containment-check absence in pkg/git/git.go
+- [Gantry Security Architecture](project_security_arch.md) — threat model: Jsonnet merge pipeline, path injection via f.Path, MemoryImporter scope, no resource limits
