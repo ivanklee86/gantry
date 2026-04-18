@@ -1,0 +1,90 @@
+version: 2
+
+before:
+  hooks:
+    - go mod tidy
+
+builds:
+  - id: "gantry"
+    binary: gantry
+    env:
+      - CGO_ENABLED=0
+    goos:
+      - linux
+      - darwin
+      - windows
+    goarch:
+      - amd64
+      - arm64
+    ldflags:
+      - -s -w
+      - -X main.version={{.Version}}
+
+archives:
+  - id: default
+    formats:
+      - tar.gz
+    format_overrides:
+      - goos: windows
+        formats:
+          - zip
+    name_template: "{{ .ProjectName }}_{{ .Version }}_{{ .Os }}_{{ .Arch }}"
+
+checksum:
+  name_template: "checksums.txt"
+
+changelog:
+  sort: asc
+  use: github
+  filters:
+    exclude:
+      - "^docs:"
+      - "^test:"
+      - "^chore:"
+  groups:
+    - title: "New Features"
+      regexp: "^feat"
+      order: 0
+    - title: "Bug Fixes"
+      regexp: "^fix"
+      order: 1
+    - title: "Other"
+      order: 999
+
+dockers:
+  - image_templates:
+      - "ghcr.io/ivanklee86/gantry:{{ .Version }}-amd64"
+    dockerfile: Dockerfile
+    goos: linux
+    goarch: amd64
+    use: buildx
+    build_flag_templates:
+      - "--platform=linux/amd64"
+  - image_templates:
+      - "ghcr.io/ivanklee86/gantry:{{ .Version }}-arm64"
+    dockerfile: Dockerfile
+    goos: linux
+    goarch: arm64
+    use: buildx
+    build_flag_templates:
+      - "--platform=linux/arm64"
+
+docker_manifests:
+  - name_template: "ghcr.io/ivanklee86/gantry:{{ .Version }}"
+    image_templates:
+      - "ghcr.io/ivanklee86/gantry:{{ .Version }}-amd64"
+      - "ghcr.io/ivanklee86/gantry:{{ .Version }}-arm64"
+  - name_template: "ghcr.io/ivanklee86/gantry:latest"
+    image_templates:
+      - "ghcr.io/ivanklee86/gantry:{{ .Version }}-amd64"
+      - "ghcr.io/ivanklee86/gantry:{{ .Version }}-arm64"
+
+homebrew_casks:
+  - name: gantry
+    homepage: "https://github.com/ivanklee86/gantry"
+    description: "A CLI for Platform-izing devcontainers in microservices, widely distributed, or just complicated™ situations."
+    directory: Casks
+    repository:
+      owner: ivanklee86
+      name: homebrew-tap
+      token: "{{ .Env.GITHUB_HOMEBREW_AUTH_TOKEN }}"
