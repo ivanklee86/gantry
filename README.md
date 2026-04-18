@@ -2,6 +2,8 @@
 
 A CLI for Platform-izing devcontainers in microservices, widely distributed, or just complicated™ situations.
 
+![](docs/images/gantry.png)
+
 ## Why gantry?
 
 [Devcontainers](https://containers.dev/) are an amazing tool for building shared, secure development environments for distributed teams.  However, managing the configuration (Dockerfile, `devcontainer.json`) comes with its own complexities: teams want to customize tools, programming languages have different standards, and services proliferate.  
