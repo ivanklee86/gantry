@@ -335,13 +335,17 @@ func TestIsLocalPath(t *testing.T) {
 // --- resolveLocalPath ---
 
 func TestResolveLocalPath_Absolute(t *testing.T) {
-	got, err := resolveLocalPath("/workspaces/gantry")
+	cwd, err := os.Getwd()
+	require.NoError(t, err)
+	got, err := resolveLocalPath(cwd)
 	require.NoError(t, err)
 	assert.True(t, filepath.IsAbs(got))
 }
 
 func TestResolveLocalPath_FileURI(t *testing.T) {
-	got, err := resolveLocalPath("file:///workspaces/gantry")
+	cwd, err := os.Getwd()
+	require.NoError(t, err)
+	got, err := resolveLocalPath("file://" + cwd)
 	require.NoError(t, err)
 	assert.True(t, filepath.IsAbs(got))
 }
