@@ -1,7 +1,8 @@
 {
   "permissions": {
     "allow": [
-      "Bash(GANTRY_INTEGRATION_TESTS=1 go test *)"
+      "Bash(GANTRY_INTEGRATION_TESTS=1 go test *)",
+      "WebFetch(domain:goreleaser.com)"
     ]
   }
 }

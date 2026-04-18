@@ -51,33 +51,16 @@ changelog:
     - title: "Other"
       order: 999
 
-dockers:
-  - image_templates:
-      - "ghcr.io/ivanklee86/gantry:{{ .Version }}-amd64"
-    dockerfile: Dockerfile
-    goos: linux
-    goarch: amd64
-    use: buildx
-    build_flag_templates:
-      - "--platform=linux/amd64"
-  - image_templates:
-      - "ghcr.io/ivanklee86/gantry:{{ .Version }}-arm64"
-    dockerfile: Dockerfile
-    goos: linux
-    goarch: arm64
-    use: buildx
-    build_flag_templates:
-      - "--platform=linux/arm64"
-
-docker_manifests:
-  - name_template: "ghcr.io/ivanklee86/gantry:{{ .Version }}"
-    image_templates:
-      - "ghcr.io/ivanklee86/gantry:{{ .Version }}-amd64"
-      - "ghcr.io/ivanklee86/gantry:{{ .Version }}-arm64"
-  - name_template: "ghcr.io/ivanklee86/gantry:latest"
-    image_templates:
-      - "ghcr.io/ivanklee86/gantry:{{ .Version }}-amd64"
-      - "ghcr.io/ivanklee86/gantry:{{ .Version }}-arm64"
+dockers_v2:
+  - dockerfile: Dockerfile
+    images:
+      - "ghcr.io/ivanklee86/gantry"
+    tags:
+      - "{{ .Version }}"
+      - "latest"
+    platforms:
+      - linux/amd64
+      - linux/arm64
 
 homebrew_casks:
   - name: gantry
