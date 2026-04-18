@@ -436,7 +436,10 @@ func TestIntegration_OpenLocal_Absolute(t *testing.T) {
 		t.Skip("set GANTRY_INTEGRATION_TESTS=1 to run integration tests")
 	}
 
-	repo, err := OpenLocal("/workspaces/gantry", "")
+	repoRoot, err := filepath.Abs("../../")
+	require.NoError(t, err)
+
+	repo, err := OpenLocal(repoRoot, "")
 	require.NoError(t, err)
 
 	files, err := repo.GetFiles([]string{"go.mod"})
@@ -466,7 +469,10 @@ func TestIntegration_OpenLocal_FileURI(t *testing.T) {
 		t.Skip("set GANTRY_INTEGRATION_TESTS=1 to run integration tests")
 	}
 
-	repo, err := OpenLocal("file:///workspaces/gantry", "")
+	repoRoot, err := filepath.Abs("../../")
+	require.NoError(t, err)
+
+	repo, err := OpenLocal("file://"+repoRoot, "")
 	require.NoError(t, err)
 
 	files, err := repo.GetFiles([]string{"go.mod"})
