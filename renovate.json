@@ -1,6 +1,29 @@
 {
   "$schema": "https://docs.renovatebot.com/renovate-schema.json",
   "extends": [
-    "config:recommended"
+    "config:recommended",
+    ":separateMajorReleases",
+    "security:openssf-scorecard"
+  ],
+  "stabilityDays": 5,
+  "automerge": true,
+  "automergeType": "pr",
+  "packageRules": [
+    {
+      "description": "Group all minor and patch updates into a single PR",
+      "matchUpdateTypes": ["minor", "patch"],
+      "groupName": "all non-major dependencies",
+      "groupSlug": "all-minor-patch",
+      "stabilityDays": 5,
+      "automerge": true
+    },
+    {
+      "description": "Group all major updates into a single PR",
+      "matchUpdateTypes": ["major"],
+      "groupName": "all major dependencies",
+      "groupSlug": "all-major",
+      "stabilityDays": 5,
+      "automerge": true
+    }
   ]
 }

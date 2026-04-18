@@ -87,4 +87,4 @@ homebrew_casks:
     repository:
       owner: ivanklee86
       name: homebrew-tap
-      token: "{{ .Env.GITHUB_HOMEBREW_AUTH_TOKEN }}"
+      token: "{{ .Env.HOMEBREW_AUTH_TOKEN }}"
