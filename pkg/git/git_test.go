@@ -313,6 +313,9 @@ func TestParseURLSubdir_TraversalRejected(t *testing.T) {
 func TestIsLocalPath(t *testing.T) {
 	local := []string{
 		"/absolute/path",
+		".",
+		"..",
+		"../../..",
 		"./relative",
 		"../parent",
 		"file:///path/to/repo",

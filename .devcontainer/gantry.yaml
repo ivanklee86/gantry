@@ -7,3 +7,7 @@ overlays:
     ref: main
     files:
       - devcontainer_configs/bases/go/devcontainer.json
+
+  - repo: ".."
+    files:
+      - .devcontainer/extension.jsonnet

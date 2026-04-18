@@ -161,11 +161,23 @@ func Clone(opts CloneOptions, progress io.Writer) (Repository, error) {
 
 // IsLocalPath reports whether ref looks like a local filesystem path or file URI
 // rather than a remote URL. Use this to decide between Clone and OpenLocal.
+// Anything that is not a recognized remote URL scheme (https, http, ssh, git, git@)
+// is treated as local, so paths like ".", "..", "../../configs", or absolute paths
+// all work without explicit enumeration.
 func IsLocalPath(ref string) bool {
-	return filepath.IsAbs(ref) ||
-		strings.HasPrefix(ref, "./") ||
-		strings.HasPrefix(ref, "../") ||
-		strings.HasPrefix(ref, "file://")
+	if strings.HasPrefix(ref, "git@") {
+		return false
+	}
+	u, err := url.Parse(ref)
+	if err != nil {
+		return true
+	}
+	switch u.Scheme {
+	case "https", "http", "ssh", "git":
+		return false
+	default:
+		return true
+	}
 }
 
 // OpenLocal opens a local git repository for reading.
