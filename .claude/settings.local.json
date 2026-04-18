@@ -1,18 +1,7 @@
 {
   "permissions": {
     "allow": [
-      "Bash(git merge:*)",
-      "Bash(go mod:*)",
-      "Bash(git add:*)",
-      "Bash(go build:*)",
-      "Bash(go test:*)",
-      "Bash(./bin/gantry build:*)",
-      "Bash(echo \"Exit: $?\")",
-      "Bash(golangci-lint run:*)",
-      "WebSearch",
-      "WebFetch(domain:goreleaser.com)",
-      "WebFetch(domain:github.com)",
-      "Bash(golangci-lint run:*)"
+      "Bash(GANTRY_INTEGRATION_TESTS=1 go test *)"
     ]
   }
 }

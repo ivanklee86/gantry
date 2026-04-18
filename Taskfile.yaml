@@ -15,6 +15,7 @@ tasks:
       - task: fmt
       - task: lint
       - task: test
+      - task: integration-test
 
   install:
     desc: Installs Golang dependencies and testing tools.

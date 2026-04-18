@@ -230,16 +230,14 @@ func TestIntegration_Build_LocalRepo_Stdout(t *testing.T) {
 		Overlays: []config.Overlay{
 			{
 				Repo:  repoRoot,
-				Files: []string{"go.mod"},
+				Files: []string{"renovate.json"},
 			},
 		},
 	}
 
 	err = g.Build(context.Background(), cfg)
 	require.NoError(t, err)
-	// go.mod is not valid JSON, so the merger will error — skip JSON check.
-	// Just verify no panic and the file content is in the output.
-	assert.Contains(t, out.String(), "ivanklee86/gantry")
+	assert.Contains(t, out.String(), "config:recommended")
 }
 
 func TestIntegration_Build_RemoteRepo_HTTPS(t *testing.T) {
