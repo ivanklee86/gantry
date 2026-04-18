@@ -1,0 +1,1 @@
+- [Gantry e2e test conventions](project_e2e_conventions.md) — file locations, helpers, behavioral facts, and edge cases for writing Gantry e2e tests

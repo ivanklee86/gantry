@@ -7,6 +7,7 @@ import (
 
 	"github.com/spf13/pflag"
 
+	"github.com/ivanklee86/gantry/cmd/build"
 	"github.com/ivanklee86/gantry/pkg/gantry"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
@@ -35,10 +36,12 @@ func NewRootCommand() *cobra.Command {
 	var v *viper.Viper
 
 	cmd := &cobra.Command{
-		Use:     "gantry",
-		Short:   "Enforce minimum versions in CI/CD.",
-		Long:    "A CLI to enforce minimum versions for packages in CI/CD.",
-		Version: version,
+		Use:           "gantry",
+		Short:         "Enforce minimum versions in CI/CD.",
+		Long:          "A CLI to enforce minimum versions for packages in CI/CD.",
+		Version:       version,
+		SilenceUsage:  true,
+		SilenceErrors: true,
 		PersistentPreRunE: func(cmd *cobra.Command, args []string) error {
 			g.Out = cmd.OutOrStdout()
 			g.Err = cmd.ErrOrStderr()
@@ -52,6 +55,8 @@ func NewRootCommand() *cobra.Command {
 			return err
 		},
 	}
+
+	cmd.AddCommand(build.NewBuildCommand(g))
 
 	_ = v // available to subcommand closures added via cmd.AddCommand
 

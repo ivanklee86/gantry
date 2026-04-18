@@ -13,18 +13,12 @@ const (
 
 // printToStream prints a generic message to the provided stream (for example, stdout or stderr).
 func printToStream(stream io.Writer, msg interface{}) {
-	_, err := fmt.Fprintf(stream, "%v\n", msg)
-	if err != nil {
-		panic(err)
-	}
+	_, _ = fmt.Fprintf(stream, "%v\n", msg)
 }
 
 // printToStreamWithColor prints a message after wrapping it in ANSI color codes.
 func printToStreamWithColor(stream io.Writer, color text.Color, msg interface{}) {
-	_, err := fmt.Fprint(stream, color.Sprintf("%v\n", msg))
-	if err != nil {
-		panic(err)
-	}
+	_, _ = fmt.Fprint(stream, color.Sprintf("%v\n", msg))
 }
 
 // OutputHeading prints a header to stdout.

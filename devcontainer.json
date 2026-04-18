@@ -1,0 +1,47 @@
+{
+   "build": null,
+   "customizations": {
+      "vscode": {
+         "extensions": [
+            "anthropic.claude-code",
+            "GitHub.copilot",
+            "golang.go",
+            "ms-azuretools.vscode-docker",
+            "redhat.vscode-yaml",
+            "tamasfe.even-better-toml",
+            "task.vscode-task",
+            "eamodio.gitlens",
+            "ms-vscode.makefile-tools"
+         ],
+         "settings": {
+            "editor.formatOnSave": true,
+            "editor.rulers": [
+               100
+            ],
+            "yaml.schemas": {
+               "https://taskfile.dev/schema.json": [
+                  "**/Taskfile.yml",
+                  "tasks/**"
+               ]
+            }
+         }
+      }
+   },
+   "features": {
+      "ghcr.io/devcontainers/features/docker-in-docker:2": {
+         "moby": false
+      }
+   },
+   "image": "ghcr.io/myteam/devcontainer/go:1.26",
+   "mounts": [
+      "source=${localEnv:HOME}/.gitconfig,target=/home/vscode/.gitconfig,type=bind,consistency=cached"
+   ],
+   "name": "myteam-go",
+   "postCreateCommand": {
+      "install-prek": "prek install && prek run"
+   },
+   "remoteEnv": {
+      "TEAM": "platform"
+   },
+   "remoteUser": "vscode"
+}

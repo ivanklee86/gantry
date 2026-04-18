@@ -1,0 +1,15 @@
+version: 1
+
+# Demonstrates an error when a file listed in the config does not exist
+# in the repository.
+#
+# Run from the repository root:
+#   gantry build --config examples/errors/missing-file.yaml
+#
+# Expected error: overlay 1 (...): get files: open nonexistent.json: file does not exist
+
+overlays:
+  - repo: "./"
+    subdirectory: "examples/errors"
+    files:
+      - "nonexistent.json"

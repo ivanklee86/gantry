@@ -1,0 +1,20 @@
+version: 1
+
+# Where to write the merged devcontainer.json.
+output_path: ".devcontainer/devcontainer.json"
+
+overlays:
+  # 1. Pull the shared Go base from the central devcontainers repository.
+  #    This gives every Go project the same image, extensions, and settings.
+  - repo: "https://github.com/ivanklee86/devcontainers"
+    ref: "refs/heads/main"
+    subdirectory: "devcontainer_configs/bases/go"
+    files:
+      - "devcontainer.json"
+
+  # 2. Apply a local team overlay that lives in the examples/ directory of
+  #    this repository. "./" resolves to the CWD (repo root) at runtime.
+  - repo: "./"
+    subdirectory: "examples"
+    files:
+      - "team-override.jsonnet"

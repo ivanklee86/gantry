@@ -12,7 +12,9 @@ The git module clones remote repos into memory (go-git in-memory filesystem) and
 - resolveLocalPath accepts relative paths resolved from CWD — ../escape is possible when the caller controls the path string
 - ParseURLSubdir skips scheme "://" before searching for "//" separator — works correctly for known schemes but does no sanitisation of the extracted subdirectory
 - go-git v6 is alpha (v6.0.0-alpha.1) — supply chain / stability risk
-- cyphar/filepath-securejoin is present as an indirect dependency (pulled in by go-git) but is NOT used directly by this module
+- cyphar/filepath-securejoin IS used directly in GetFiles for per-file path containment (securejoin.SecureJoin with root "/") — this mitigates "../" in caller-supplied file paths
+- Subdirectory is still concatenated with naive string interpolation (subdirectory + "/" + p) before passing to securejoin; securejoin does resolve the combined value, but a malicious subdirectory alone (e.g. "../../etc") could escape root if securejoin is bypassed or misused
+- resolveLocalPath accepts relative paths resolved from CWD — ../escape is possible when the caller controls the local repo path string
 
 **Why this matters:** The module is a shared library used by higher-level CLI commands. Any missing input validation here propagates to all callers.
 
