@@ -335,13 +335,17 @@ func TestIsLocalPath(t *testing.T) {
 // --- resolveLocalPath ---
 
 func TestResolveLocalPath_Absolute(t *testing.T) {
-	got, err := resolveLocalPath("/workspaces/gantry")
+	cwd, err := os.Getwd()
+	require.NoError(t, err)
+	got, err := resolveLocalPath(cwd)
 	require.NoError(t, err)
 	assert.True(t, filepath.IsAbs(got))
 }
 
 func TestResolveLocalPath_FileURI(t *testing.T) {
-	got, err := resolveLocalPath("file:///workspaces/gantry")
+	cwd, err := os.Getwd()
+	require.NoError(t, err)
+	got, err := resolveLocalPath("file://" + cwd)
 	require.NoError(t, err)
 	assert.True(t, filepath.IsAbs(got))
 }
@@ -432,7 +436,10 @@ func TestIntegration_OpenLocal_Absolute(t *testing.T) {
 		t.Skip("set GANTRY_INTEGRATION_TESTS=1 to run integration tests")
 	}
 
-	repo, err := OpenLocal("/workspaces/gantry", "")
+	repoRoot, err := filepath.Abs("../../")
+	require.NoError(t, err)
+
+	repo, err := OpenLocal(repoRoot, "")
 	require.NoError(t, err)
 
 	files, err := repo.GetFiles([]string{"go.mod"})
@@ -462,7 +469,10 @@ func TestIntegration_OpenLocal_FileURI(t *testing.T) {
 		t.Skip("set GANTRY_INTEGRATION_TESTS=1 to run integration tests")
 	}
 
-	repo, err := OpenLocal("file:///workspaces/gantry", "")
+	repoRoot, err := filepath.Abs("../../")
+	require.NoError(t, err)
+
+	repo, err := OpenLocal("file://"+repoRoot, "")
 	require.NoError(t, err)
 
 	files, err := repo.GetFiles([]string{"go.mod"})

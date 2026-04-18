@@ -15,6 +15,7 @@ tasks:
       - task: fmt
       - task: lint
       - task: test
+      - task: integration-test
 
   install:
     desc: Installs Golang dependencies and testing tools.
@@ -52,7 +53,7 @@ tasks:
   test-ci:
     desc: Run Golang tests and generate coverage report.
     cmds:
-      - go test -coverprofile {{.COVERAGE_RAW}} -v ./... 2>&1  | go-junit-report > {{.TEST_REPORT}}
+      - go test -coverprofile {{.COVERAGE_RAW}} -v ./... 2>&1
       - go tool cover -html={{.COVERAGE_RAW}} -o {{.COVERAGE_REPORT}}
 
   integration-test:
@@ -63,4 +64,4 @@ tasks:
   integration-test-ci:
     desc: Run integration tests and generate junit report.
     cmds:
-      - GANTRY_INTEGRATION_TESTS=1 go test -v -run Integration ./... 2>&1 | go-junit-report -set-exit-code >> {{.TEST_REPORT}}
+      - GANTRY_INTEGRATION_TESTS=1 go test -v -run Integration ./... 2>&1 

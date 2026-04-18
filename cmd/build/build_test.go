@@ -475,11 +475,10 @@ overlays:
 
 func TestE2E_Build_FileURILocalRepo(t *testing.T) {
 	// Tests the file:// URI scheme path through IsLocalPath → OpenLocal.
-	// The repo is always at /workspaces/gantry in the devcontainer.
 	configPath := writeTempConfig(t, `
 version: 1
 overlays:
-  - repo: "file:///workspaces/gantry"
+  - repo: "file://`+repoRoot+`"
     files:
       - "renovate.json"
 `)

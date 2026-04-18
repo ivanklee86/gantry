@@ -44,8 +44,8 @@ jobs:
     - name: Run integration tests.
       run: |
         task integration-test-ci
-    # - name: Coveralls 
-    #   uses: coverallsapp/github-action@master
-    #   with:
-    #     github-token: ${{ secrets.GITHUB_TOKEN }}
-    #     path-to-lcov: coverage.lcov
+    - name: Upload coverage reports to Codecov
+      uses: codecov/codecov-action@v5
+      with:
+        token: ${{ secrets.CODECOV_TOKEN }}
+        slug: ivanklee86/gantry
