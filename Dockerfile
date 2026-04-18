@@ -1,3 +1,4 @@
 FROM gcr.io/distroless/static:nonroot
-COPY gantry /usr/local/bin/gantry
+ARG TARGETPLATFORM
+COPY $TARGETPLATFORM/gantry /usr/local/bin/gantry
 ENTRYPOINT ["/usr/local/bin/gantry"]
