@@ -17,6 +17,12 @@ tasks:
       - task: test
       - task: integration-test
 
+  devcontainers:
+    desc: Generates devcontainer.json
+    dir: .devcontainer
+    cmds:
+      - ../bin/gantry build --config gantry.yaml --write
+
   install:
     desc: Installs Golang dependencies and testing tools.
     cmds:

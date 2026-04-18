@@ -36,6 +36,7 @@ brew install ivanklee86/tap/gantry
 
 ```sh
 docker pull ghcr.io/ivanklee86/gantry:latest
+docker run --rm ghcr.io/ivanklee86/gantry:latest
 ```
 
 To embed `gantry` in your own Dockerfile:
@@ -51,21 +52,15 @@ COPY --from=ghcr.io/ivanklee86/gantry:latest /usr/local/bin/gantry /usr/local/bi
 Build from a single remote repository and print to stdout:
 
 ```sh
-gantry build --repo https://github.com/org/devcontainers --ref refs/heads/main --files base.jsonnet --files python.jsonnet
+gantry build --repo https://github.com/ivanklee86/devcontainers --ref main --files devcontainer_configs/bases/go/devcontainer.json
 ```
 
 Write the result to a file:
 
 ```sh
-gantry build --repo https://github.com/org/devcontainers --ref refs/heads/main \
-  --files base.jsonnet --files python.jsonnet \
+gantry build --repo https://github.com/ivanklee86/devcontainers --ref main \
+  --files devcontainer_configs/bases/go/devcontainer.json \
   --write --output-path .devcontainer/devcontainer.json
-```
-
-Pin to an exact commit:
-
-```sh
-gantry build --repo https://github.com/org/devcontainers --commit abc1234 --files base.jsonnet
 ```
 
 ### YAML configuration file
@@ -78,11 +73,10 @@ version: 1
 output_path: .devcontainer/devcontainer.json
 
 overlays:
-  - repo: https://github.com/org/devcontainers
-    ref: refs/heads/main
+  - repo: https://github.com/ivanklee86/devcontainers
+    ref: main
     files:
-      - base.jsonnet
-      - python.jsonnet
+      - devcontainer_configs/bases/go/devcontainer.json
   - repo: https://github.com/org/team-overlays
     ref: refs/heads/main
     subdirectory: data-team

@@ -69,3 +69,10 @@ homebrew_casks:
       owner: ivanklee86
       name: homebrew-tap
       token: "{{ .Env.HOMEBREW_AUTH_TOKEN }}"
+    hooks:
+      post:
+        # replace foo with the actual binary name
+        install: |
+          if OS.mac?
+            system_command "/usr/bin/xattr", args: ["-dr", "com.apple.quarantine", "#{staged_path}/gantry"]
+          end
