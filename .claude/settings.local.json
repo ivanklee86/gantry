@@ -1,18 +1,18 @@
 {
   "permissions": {
     "allow": [
-      "Bash(find /workspaces/gantry -type f -not -path */.*)",
-      "Bash(go doc:*)",
-      "Read(//root/go/pkg/mod/github.com/**)",
-      "Read(//home/vscode/go/pkg/mod/github.com/google/**)",
-      "WebFetch(domain:raw.githubusercontent.com)",
+      "Bash(git merge:*)",
+      "Bash(go mod:*)",
+      "Bash(git add:*)",
+      "Bash(go build:*)",
       "Bash(go test:*)",
       "Bash(./bin/gantry build:*)",
       "Bash(echo \"Exit: $?\")",
       "Bash(golangci-lint run:*)",
       "WebSearch",
       "WebFetch(domain:goreleaser.com)",
-      "WebFetch(domain:github.com)"
+      "WebFetch(domain:github.com)",
+      "Bash(golangci-lint run:*)"
     ]
   }
 }

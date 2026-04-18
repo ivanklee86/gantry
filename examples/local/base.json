@@ -1,0 +1,18 @@
+{
+  "name": "my-project",
+  "image": "mcr.microsoft.com/devcontainers/base:ubuntu",
+  "remoteUser": "vscode",
+  "customizations": {
+    "vscode": {
+      "settings": {
+        "editor.formatOnSave": true
+      },
+      "extensions": [
+        "ms-vscode.vscode-json"
+      ]
+    }
+  },
+  "postCreateCommand": {
+    "upgrade": "sudo apt-get update && sudo apt-get upgrade -y"
+  }
+}

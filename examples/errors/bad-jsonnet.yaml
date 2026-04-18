@@ -1,0 +1,19 @@
+version: 1
+
+# Demonstrates a merge error caused by invalid Jsonnet syntax.
+#
+# Run from the repository root:
+#   gantry build --config examples/errors/bad-jsonnet.yaml
+#
+# Expected error: overlay 2 (...): merge failed: jsonnet evaluation: ...
+
+overlays:
+  - repo: "./"
+    subdirectory: "examples/errors"
+    files:
+      - "valid-base.json"
+
+  - repo: "./"
+    subdirectory: "examples/errors"
+    files:
+      - "bad.jsonnet"
