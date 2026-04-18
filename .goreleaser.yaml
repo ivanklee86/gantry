@@ -34,8 +34,10 @@ checksum:
   name_template: "checksums.txt"
 
 sboms:
-  - artifacts: archive
-  - artifacts: source
+  - id: archive
+    artifacts: archive
+  - id: source
+    artifacts: source
 
 signs:
   - cmd: cosign
