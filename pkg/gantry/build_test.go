@@ -222,11 +222,14 @@ func TestIntegration_Build_LocalRepo_Stdout(t *testing.T) {
 	var errBuf bytes.Buffer
 	g := testGantry(&out, &errBuf)
 
+	repoRoot, err := filepath.Abs("../../")
+	require.NoError(t, err)
+
 	cfg := config.BuildConfig{
 		Version: 1,
 		Overlays: []config.Overlay{
 			{
-				Repo:  "/workspaces/gantry",
+				Repo:  repoRoot,
 				Files: []string{"go.mod"},
 			},
 		},
