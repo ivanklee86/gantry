@@ -31,7 +31,7 @@ jobs:
         restore-keys: |
           ${{ runner.os }}-go-
     - name: Install Task
-      uses: arduino/setup-task@v2
+      uses: arduino/setup-task@v3.0.0
     - name: Install all dependencies
       run: |
         task install-ci
