@@ -38,8 +38,8 @@ func NewRootCommand() *cobra.Command {
 
 	cmd := &cobra.Command{
 		Use:           "gantry",
-		Short:         "Enforce minimum versions in CI/CD.",
-		Long:          "A CLI to enforce minimum versions for packages in CI/CD.",
+		Short:         "Build devcontainer.json files from layered, shared overlays.",
+		Long:          "A CLI for Platform-izing devcontainers in microservices, widely distributed, or just complicated™ situations.\n\nGantry fetches devcontainer.json and Jsonnet overlays from one or more git repositories and merges them, in order, into a single devcontainer.json.",
 		Version:       version,
 		SilenceUsage:  true,
 		SilenceErrors: true,
