@@ -14,7 +14,7 @@ import (
 	"github.com/go-git/go-billy/v6/memfs"
 	gogit "github.com/go-git/go-git/v6"
 	"github.com/go-git/go-git/v6/plumbing"
-	"github.com/go-git/go-git/v6/plumbing/transport"
+	"github.com/go-git/go-git/v6/plumbing/client"
 	githttp "github.com/go-git/go-git/v6/plumbing/transport/http"
 	"github.com/go-git/go-git/v6/plumbing/transport/ssh"
 	"github.com/go-git/go-git/v6/storage/memory"
@@ -127,11 +127,16 @@ func Clone(opts CloneOptions, progress io.Writer) (Repository, error) {
 		depth = 0
 	}
 
+	clientOpts, err := clientOptions(auth)
+	if err != nil {
+		return nil, fmt.Errorf("build auth: %w", err)
+	}
+
 	cloneOpts := &gogit.CloneOptions{
-		URL:      opts.URL,
-		Auth:     auth,
-		Depth:    depth,
-		Progress: progress,
+		URL:           opts.URL,
+		ClientOptions: clientOpts,
+		Depth:         depth,
+		Progress:      progress,
 	}
 	if opts.ReferenceName != "" {
 		cloneOpts.ReferenceName = plumbing.ReferenceName(opts.ReferenceName)
@@ -199,7 +204,7 @@ func OpenLocal(repoPath, subdir string) (Repository, error) {
 		return nil, fmt.Errorf("get worktree: %w", err)
 	}
 
-	return &inMemoryRepository{fs: wt.Filesystem, subdirectory: subdir}, nil
+	return &inMemoryRepository{fs: wt.Filesystem(), subdirectory: subdir}, nil
 }
 
 func resolveLocalPath(p string) (string, error) {
@@ -291,7 +296,26 @@ func redactURL(rawURL string) string {
 	return u.Redacted()
 }
 
-func buildAuth(opts CloneOptions) (transport.AuthMethod, error) {
+// authMethod is a go-git credential: an HTTP type implementing client.HTTPAuth
+// (githttp.TokenAuth, githttp.BasicAuth) or an SSH type implementing
+// client.SSHAuth (ssh.PublicKeys, ssh.PublicKeysCallback). nil means anonymous.
+type authMethod any
+
+// clientOptions converts an authMethod into go-git transport client options.
+func clientOptions(auth authMethod) ([]client.Option, error) {
+	switch a := auth.(type) {
+	case nil:
+		return nil, nil
+	case client.HTTPAuth:
+		return []client.Option{client.WithHTTPAuth(a)}, nil
+	case client.SSHAuth:
+		return []client.Option{client.WithSSHAuth(a)}, nil
+	default:
+		return nil, fmt.Errorf("unsupported auth method %T", auth)
+	}
+}
+
+func buildAuth(opts CloneOptions) (authMethod, error) {
 	hasCredentials := opts.Token != "" || opts.Username != "" || opts.Password != ""
 
 	// Refuse to transmit credentials over plaintext transports.
