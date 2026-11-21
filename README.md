@@ -1,5 +1,7 @@
 # gantry
 
+[![CI](https://github.com/ivanklee86/gantry/actions/workflows/ci.yaml/badge.svg)](https://github.com/ivanklee86/gantry/actions/workflows/ci.yaml) [![Coverage](https://raw.githubusercontent.com/ivanklee86/octocov-central/main/badges/ivanklee86/gantry/coverage.svg)](https://octocov.dev/ivanklee86/gantry) [![Test Execution Time](https://raw.githubusercontent.com/ivanklee86/octocov-central/main/badges/ivanklee86/gantry/time.svg)](https://octocov.dev/ivanklee86/gantry)
+
 A CLI for Platform-izing devcontainers in microservices, widely distributed, or just complicated™ situations.
 
 ![](docs/images/gantry.png)
