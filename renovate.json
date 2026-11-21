@@ -2,28 +2,93 @@
   "$schema": "https://docs.renovatebot.com/renovate-schema.json",
   "extends": [
     "config:recommended",
-    ":separateMajorReleases",
-    "security:openssf-scorecard"
+    "helpers:pinGitHubActionDigests"
   ],
-  "stabilityDays": 5,
-  "automerge": true,
-  "automergeType": "pr",
+  "schedule": ["on friday"],
+  "minimumReleaseAge": "5 days",
+  "minimumReleaseAgeBehaviour": "timestamp-optional",
+  "postUpdateOptions": ["gomodTidy", "gomodUpdateImportPaths"],
   "packageRules": [
     {
-      "description": "Group all minor and patch updates into a single PR",
-      "matchUpdateTypes": ["minor", "patch"],
-      "groupName": "all non-major dependencies",
-      "groupSlug": "all-minor-patch",
-      "stabilityDays": 5,
+      "matchDatasources": ["go", "golang-version"],
+      "groupName": "go"
+    },
+    {
+      "matchManagers": ["dockerfile", "devcontainer"],
+      "matchPackageNames": ["golang", "ghcr.io/ivanklee86/devcontainer/go"],
+      "groupName": "go"
+    },
+    {
+      "description": "go-git v6 is pre-release and breaks its API between pre-releases (alpha.1 -> beta.1 stalled every other update for months); keep it out of the go group so it can't block the rest",
+      "matchPackageNames": ["github.com/go-git/**"],
+      "groupName": "go-git"
+    },
+    {
+      "matchManagers": ["github-actions", "custom.regex"],
+      "groupName": "ci"
+    },
+    {
+      "description": "Go tools installed by `go install` in Taskfile.yaml are CI tooling, not module dependencies",
+      "matchFileNames": ["Taskfile.yaml"],
+      "groupName": "ci"
+    },
+    {
+      "description": "Task tags are v-prefixed, but arduino/setup-task needs a bare version (it re-adds the v)",
+      "matchPackageNames": ["go-task/task"],
+      "extractVersion": "^v(?<version>.*)$"
+    },
+    {
+      "matchManagers": ["devcontainer"],
+      "matchPackageNames": ["!ghcr.io/ivanklee86/devcontainer/go"],
+      "groupName": "devcontainer dependencies"
+    },
+    {
+      "matchUpdateTypes": ["minor", "patch", "pin", "digest", "pinDigest", "major"],
       "automerge": true
     },
     {
-      "description": "Group all major updates into a single PR",
+      "description": "Module and toolchain majors change APIs or language behavior; review by hand",
+      "matchDatasources": ["go", "golang-version"],
       "matchUpdateTypes": ["major"],
-      "groupName": "all major dependencies",
-      "groupSlug": "all-major",
-      "stabilityDays": 5,
-      "automerge": true
+      "automerge": false
+    },
+    {
+      "matchPackageNames": ["golang", "ghcr.io/ivanklee86/devcontainer/go"],
+      "matchUpdateTypes": ["major", "minor"],
+      "automerge": false
+    },
+    {
+      "description": "Pre-release go-git bumps can break the API (see go-git group); review by hand",
+      "matchPackageNames": ["github.com/go-git/**"],
+      "automerge": false
+    }
+  ],
+  "customManagers": [
+    {
+      "description": "`version: X # datasource/depName` in workflows (goreleaser, octocov, prek)",
+      "customType": "regex",
+      "managerFilePatterns": ["/^\\.github/workflows/.+\\.ya?ml$/"],
+      "matchStrings": ["version: (?<currentValue>v?[0-9.]+) # (?<datasource>.*?)/(?<depName>.*?)\\s"]
+    },
+    {
+      "description": "Pinned Task version in the setup-task composite action",
+      "customType": "regex",
+      "managerFilePatterns": ["/^\\.github/actions/setup-task/action\\.yml$/"],
+      "matchStrings": ["default: '(?<currentValue>.*?)' # (?<datasource>.*?)/(?<depName>.*?)\\s"]
+    },
+    {
+      "description": "`go install module@version` in Taskfile.yaml (golangci-lint, go-junit-report)",
+      "customType": "regex",
+      "managerFilePatterns": ["/^Taskfile\\.ya?ml$/"],
+      "matchStrings": ["go install (?<depName>[^\\s@]+)@(?<currentValue>v[^\\s]+)"],
+      "datasourceTemplate": "go"
+    },
+    {
+      "description": "Hook revs in prek.toml; Renovate's pre-commit manager only reads .pre-commit-config.yaml",
+      "customType": "regex",
+      "managerFilePatterns": ["/^prek\\.toml$/"],
+      "matchStrings": ["repo = \"https://github\\.com/(?<depName>[^\"]+)\"\\s*\\nrev = \"(?<currentValue>[^\"]+)\""],
+      "datasourceTemplate": "github-tags"
     }
   ]
 }

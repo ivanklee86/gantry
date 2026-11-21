@@ -13,3 +13,10 @@ rev = "v0.5.1"
 hooks = [
   { id = "go-fmt" },
 ]
+
+[[repos]]
+repo = "https://github.com/renovatebot/pre-commit-hooks"
+rev = "44.257.8"
+hooks = [
+  { id = "renovate-config-validator" },
+]
