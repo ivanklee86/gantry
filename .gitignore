@@ -34,4 +34,5 @@ bin
 reports/
 coverage/
 dist/
-devcontainer.json
+# Stray `gantry build` output in the repo root (the real one lives in .devcontainer/)
+/devcontainer.json

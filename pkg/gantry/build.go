@@ -106,10 +106,16 @@ func (g *Gantry) openRepo(o config.Overlay) (git.Repository, error) {
 	return git.Clone(opts, g.Err)
 }
 
-// writeOutput creates parent directories as needed and writes content to path.
+// writeOutput creates parent directories as needed and writes content to path,
+// ending it with exactly one trailing newline. That matches what editors and
+// end-of-file fixers (e.g. pre-commit's end-of-file-fixer) produce, so a
+// regenerated file doesn't show up as a diff against a committed one.
 func writeOutput(path string, content []byte) error {
 	if err := os.MkdirAll(filepath.Dir(path), 0o700); err != nil {
 		return fmt.Errorf("create output directory: %w", err)
+	}
+	if len(content) == 0 || content[len(content)-1] != '\n' {
+		content = append(content, '\n')
 	}
 	return os.WriteFile(path, content, 0o600)
 }

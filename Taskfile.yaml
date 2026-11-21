@@ -17,10 +17,17 @@ tasks:
       - task: integration-test
 
   devcontainers:
-    desc: Generates devcontainer.json
+    desc: Regenerates .devcontainer/devcontainer.json with gantry itself.
+    deps: [build]
     dir: .devcontainer
     cmds:
       - ../bin/gantry build --config gantry.yaml --write
+
+  devcontainers-check:
+    desc: Fails if the committed devcontainer.json differs from what gantry generates.
+    cmds:
+      - task: devcontainers
+      - git diff --exit-code -- .devcontainer/devcontainer.json
 
   install:
     desc: Downloads Golang module dependencies.

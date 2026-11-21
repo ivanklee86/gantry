@@ -7,6 +7,7 @@ import (
 	"errors"
 	"os"
 	"path/filepath"
+	"strings"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -138,6 +139,40 @@ func TestBuild_WriteToFile(t *testing.T) {
 	var m map[string]interface{}
 	require.NoError(t, json.Unmarshal(data, &m))
 	assert.Equal(t, "test", m["name"])
+}
+
+func TestBuild_WriteToFile_EndsWithSingleNewline(t *testing.T) {
+	dir := t.TempDir()
+	outPath := filepath.Join(dir, "devcontainer.json")
+
+	cfg := config.BuildConfig{
+		Version:    1,
+		Write:      true,
+		OutputPath: outPath,
+		Overlays: []config.Overlay{
+			{Repo: "fake", Files: []string{"base.json"}},
+		},
+	}
+	repos := []*mockRepository{
+		{files: map[string][]byte{"base.json": []byte(`{"name":"test"}`)}},
+	}
+
+	_, err := buildWithMocks(t, cfg, repos)
+	require.NoError(t, err)
+
+	data, err := os.ReadFile(outPath)
+	require.NoError(t, err)
+	assert.True(t, strings.HasSuffix(string(data), "}\n"), "want exactly one trailing newline, got %q", data[len(data)-min(len(data), 5):])
+	assert.False(t, strings.HasSuffix(string(data), "\n\n"), "want exactly one trailing newline")
+}
+
+func TestWriteOutput_DoesNotDoubleNewline(t *testing.T) {
+	outPath := filepath.Join(t.TempDir(), "out.json")
+	require.NoError(t, writeOutput(outPath, []byte("{}\n")))
+
+	data, err := os.ReadFile(outPath)
+	require.NoError(t, err)
+	assert.Equal(t, "{}\n", string(data))
 }
 
 func TestBuild_MkdirAll_CreatesParentDirs(t *testing.T) {
