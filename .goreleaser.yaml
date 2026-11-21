@@ -71,8 +71,8 @@ homebrew_casks:
       token: "{{ .Env.HOMEBREW_AUTH_TOKEN }}"
     hooks:
       post:
-        # replace foo with the actual binary name
-        install: |
-          if OS.mac?
-            system_command "/usr/bin/xattr", args: ["-dr", "com.apple.quarantine", "#{staged_path}/gantry"]
+        # Clear the quarantine flag so macOS Gatekeeper doesn't block the unsigned binary.
+        install_steps: |
+          on_macos do
+            run "/usr/bin/xattr", args: ["-dr", "com.apple.quarantine", "{{ .StagedPath }}/gantry"]
           end

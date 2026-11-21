@@ -3,9 +3,8 @@ version: '3'
 vars:
   BINARY: gantry
   BUILD_DIR: bin
-  TEST_REPORT: tests.xml
-  COVERAGE_RAW: coverage.out
-  COVERAGE_REPORT: coverage.html
+  REPORT_DIR: reports
+  COVERAGE_DIR: coverage
   VERSION: "Make"
 
 tasks:
@@ -58,10 +57,12 @@ tasks:
       - go test -v ./... 2>&1
 
   test-ci:
-    desc: Run Golang tests and generate coverage report.
+    desc: Run Golang tests and write JUnit (reports/) and coverage (coverage/) reports.
+    set: [pipefail]
     cmds:
-      - go test -coverprofile {{.COVERAGE_RAW}} -v ./... 2>&1
-      - go tool cover -html={{.COVERAGE_RAW}} -o {{.COVERAGE_REPORT}}
+      - mkdir -p {{.REPORT_DIR}} {{.COVERAGE_DIR}}
+      - go test -coverprofile {{.COVERAGE_DIR}}/coverage.out -v ./... 2>&1 | go-junit-report -set-exit-code -iocopy -out {{.REPORT_DIR}}/unit.xml
+      - go tool cover -html={{.COVERAGE_DIR}}/coverage.out -o {{.COVERAGE_DIR}}/coverage.html
 
   integration-test:
     desc: Run integration tests (requires network access).
@@ -69,6 +70,8 @@ tasks:
       - GANTRY_INTEGRATION_TESTS=1 go test -v -run Integration ./... 2>&1
 
   integration-test-ci:
-    desc: Run integration tests and generate junit report.
+    desc: Run integration tests and write JUnit (reports/) and coverage (coverage/) reports.
+    set: [pipefail]
     cmds:
-      - GANTRY_INTEGRATION_TESTS=1 go test -v -run Integration ./... 2>&1 
+      - mkdir -p {{.REPORT_DIR}} {{.COVERAGE_DIR}}
+      - GANTRY_INTEGRATION_TESTS=1 go test -coverprofile {{.COVERAGE_DIR}}/coverage-integration.out -v -run Integration ./... 2>&1 | go-junit-report -set-exit-code -iocopy -out {{.REPORT_DIR}}/integration.xml
