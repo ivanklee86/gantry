@@ -123,6 +123,26 @@ jobs:
       with:
         prek-version: v0.5.11 # github-releases/j178/prek
 
+  devcontainer:
+    # Dogfoods gantry: regenerate .devcontainer/devcontainer.json from its overlays
+    # (the shared ivanklee86/devcontainers base + gantry.libsonnet) and fail if the
+    # committed file differs. Not a required check: the base tracks upstream `main`,
+    # so upstream changes can turn this red until someone runs `task devcontainers`.
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      with:
+        persist-credentials: false
+    - name: Install Go
+      uses: actions/setup-go@d8cbb8045d7f43706b9177cceb36c1f91a6644d5 # v7.1.0
+      with:
+        go-version-file: go.mod
+    - name: Install Task
+      uses: ./.github/actions/setup-task
+    - name: Check devcontainer.json is up to date
+      run: task devcontainers-check
+
   release-check:
     # Builds what release.yaml publishes (all six binaries + the multi-arch image),
     # minus publishing and signing, so a broken .goreleaser.yaml or Dockerfile fails

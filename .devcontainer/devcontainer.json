@@ -3,6 +3,7 @@
       "vscode": {
          "extensions": [
             "anthropic.claude-code",
+            "github.vscode-github-actions",
             "GitHub.copilot",
             "golang.go",
             "ms-azuretools.vscode-docker",
@@ -15,6 +16,7 @@
             "yaml.schemas": {
                "https://taskfile.dev/schema.json": [
                   "**/Taskfile.yml",
+                  "**/Taskfile.yaml",
                   "tasks/**"
                ]
             }
@@ -22,16 +24,19 @@
       }
    },
    "features": {
-      "ghcr.io/devcontainers/features/docker-in-docker:2": {
+      "ghcr.io/devcontainers/features/docker-in-docker:4": {
          "moby": false
       }
    },
-   "image": "ghcr.io/ivanklee86/devcontainer/go:1.26",
+   "image": "ghcr.io/ivanklee86/devcontainer/go:1.27",
    "mounts": [
-      "source=${localEnv:HOME}/.gitconfig,target=/home/vscode/.gitconfig,type=bind,consistency=cached"
+      "source=${localEnv:HOME}/.gitconfig,target=/home/vscode/.gitconfig,type=bind,consistency=cached",
+      "source=${localEnv:HOME}/.claude,target=/home/vscode/.claude,type=bind,consistency=cached",
+      "source=${localEnv:HOME}/.ssh/known_hosts,target=/home/vscode/.ssh/known_hosts,type=bind,consistency=cached,readonly"
    ],
-   "name": "fullstack",
+   "name": "gantry",
    "postCreateCommand": {
+      "gantry-post-install": "bash ./.devcontainer/post_install.sh",
       "install-prek": "prek install && prek run"
    },
    "remoteUser": "vscode"

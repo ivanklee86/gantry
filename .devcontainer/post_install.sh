@@ -1,0 +1,20 @@
+#!/bin/bash
+set -ex
+
+# Download Go modules (prek hooks are installed by the install-prek postCreateCommand)
+go mod download
+
+# Configure git
+if [ "$CODESPACES" != "true" ]; then
+    echo "Running locally, configure gpg."
+
+    git config --global gpg.program gpg2
+    git config --global commit.gpgsign true
+else
+    echo "Running in codespaces."
+fi
+
+git config --global --add --bool push.autoSetupRemote true
+
+# Woohoo!
+echo "Hooray, it's done!"
