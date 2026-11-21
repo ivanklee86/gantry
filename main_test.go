@@ -28,4 +28,19 @@ func TestRoot(t *testing.T) {
 	fmt.Print(string(out))
 
 	assert.Contains(t, string(out), "gantry")
+	assert.Contains(t, string(out), "build", "root usage lists the build subcommand")
+}
+
+func TestRoot_HelpDescribesGantry(t *testing.T) {
+	b := bytes.NewBufferString("")
+
+	command := NewRootCommand()
+	command.SetOut(b)
+	command.SetArgs([]string{"--help"})
+	if err := command.Execute(); err != nil {
+		t.Fatal(err)
+	}
+
+	assert.Contains(t, b.String(), "devcontainer")
+	assert.NotContains(t, b.String(), "minimum versions", "help text must describe gantry, not another CLI")
 }
