@@ -1,0 +1,19 @@
+coverage:
+  # Downloaded by ci.yaml's report job from the amd64 test leg: unit tests
+  # (coverage.out) and integration tests (coverage-integration.out). octocov merges
+  # them into one line-coverage report.
+  paths:
+    - coverage/coverage.out
+    - coverage/coverage-integration.out
+  # TODO: set a gate once main has a baseline, e.g.
+  # acceptable: current >= XX% && diff >= -0.5%
+report:
+  datastores:
+    - artifact://${GITHUB_REPOSITORY}
+  if: is_default_branch
+diff:
+  datastores:
+    - artifact://${GITHUB_REPOSITORY}
+  if: is_pull_request
+comment:
+  if: is_pull_request

@@ -1,0 +1,32 @@
+name: 'Setup Task'
+description: 'Install a pinned Task CLI, restored from the Actions cache instead of re-downloaded on every job.'
+
+inputs:
+  version:
+    # Always an exact version, never a `.x` range. arduino/setup-task resolves a
+    # range by listing go-task/task's tags via api.github.com, anonymously unless
+    # `repo-token` is set: 60 requests/hour shared by every job on the runner's IP.
+    # A valid semver short-circuits that lookup, so no API request is made.
+    description: 'Exact Task version to install, without the leading `v`.'
+    required: false
+    default: '3.54.0' # github-releases/go-task/task
+  repo-token:
+    description: 'Token used to authenticate the go-task/task tag lookup (only used if `version` is ever a range).'
+    required: false
+    default: ${{ github.token }}
+
+runs:
+  using: 'composite'
+  steps:
+    - name: Restore cached Task binary
+      uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+      with:
+        # Cache the whole tool-cache `task` dir so the `<arch>.complete` marker that
+        # @actions/tool-cache's find() checks for comes back with the binary.
+        path: ${{ runner.tool_cache }}/task
+        key: task-${{ runner.os }}-${{ runner.arch }}-${{ inputs.version }}
+    - name: Install Task
+      uses: arduino/setup-task@c0bc642852239c2689f73f4ea6459c29405f3c52 # v3.0.0
+      with:
+        version: ${{ inputs.version }}
+        repo-token: ${{ inputs.repo-token }}
