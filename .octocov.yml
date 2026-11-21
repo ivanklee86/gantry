@@ -5,8 +5,9 @@ coverage:
   paths:
     - coverage/coverage.out
     - coverage/coverage-integration.out
-  # TODO: set a gate once main has a baseline, e.g.
-  # acceptable: current >= XX% && diff >= -0.5%
+  # Baseline on main was 83.9% (2026-11-21). Fail below 80% overall, or if a PR
+  # drops coverage by more than half a point versus main.
+  acceptable: current >= 80% && diff >= -0.5%
 report:
   datastores:
     - artifact://${GITHUB_REPOSITORY}
