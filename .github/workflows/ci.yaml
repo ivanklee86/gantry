@@ -92,6 +92,9 @@ jobs:
         files: reports/*.xml
         # Unique per leg; the action's default name would collide across the matrix.
         check_name: Test Results (${{ matrix.arch }})
+        # Check runs only: octocov owns the PR comment, and commenting would need
+        # pull-requests: write on this job too.
+        comment_mode: off
     - name: Upload coverage profiles
       # amd64 only: coverage is a property of the source, not the runner, and the
       # report job expects one fixed artifact name.
