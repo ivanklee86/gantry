@@ -90,6 +90,36 @@ func TestBuildAuth_SSH_Scheme_Agent(t *testing.T) {
 	assert.IsType(t, &ssh.PublicKeysCallback{}, auth)
 }
 
+// --- clientOptions ---
+
+func TestClientOptions_Anonymous(t *testing.T) {
+	opts, err := clientOptions(nil)
+	require.NoError(t, err)
+	assert.Empty(t, opts)
+}
+
+func TestClientOptions_HTTP(t *testing.T) {
+	for _, auth := range []authMethod{
+		&githttp.TokenAuth{Token: "tok"},
+		&githttp.BasicAuth{Username: "u", Password: "p"},
+	} {
+		opts, err := clientOptions(auth)
+		require.NoError(t, err)
+		assert.Len(t, opts, 1, "%T", auth)
+	}
+}
+
+func TestClientOptions_SSH(t *testing.T) {
+	opts, err := clientOptions(&ssh.PublicKeys{User: "git"})
+	require.NoError(t, err)
+	assert.Len(t, opts, 1)
+}
+
+func TestClientOptions_Unsupported(t *testing.T) {
+	_, err := clientOptions("not-an-auth")
+	assert.ErrorContains(t, err, "unsupported auth method")
+}
+
 // --- validateURL ---
 
 func TestValidateURL_Allowed(t *testing.T) {

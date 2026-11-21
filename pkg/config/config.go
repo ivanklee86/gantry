@@ -82,7 +82,7 @@ type CLIFlags struct {
 // LoadYAMLConfig reads a YAML config file, expands ${ENV_VAR} references in all
 // string fields, and validates the result.
 func LoadYAMLConfig(path string) (BuildConfig, error) {
-	data, err := os.ReadFile(path)
+	data, err := os.ReadFile(path) //nolint:gosec // G304: path is the user's own --config argument by design.
 	if err != nil {
 		return BuildConfig{}, fmt.Errorf("read config %s: %w", path, err)
 	}

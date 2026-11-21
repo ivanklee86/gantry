@@ -1,6 +1,7 @@
 package main
 
 import (
+	"errors"
 	"fmt"
 	"os"
 	"strings"
@@ -70,7 +71,8 @@ func initializeConfig(cmd *cobra.Command) (*viper.Viper, error) {
 	v.AddConfigPath(".")
 
 	if err := v.ReadInConfig(); err != nil {
-		if _, ok := err.(viper.ConfigFileNotFoundError); !ok {
+		var notFound viper.ConfigFileNotFoundError
+		if !errors.As(err, &notFound) {
 			return nil, err
 		}
 	}
