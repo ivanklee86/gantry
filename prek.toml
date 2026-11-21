@@ -20,3 +20,18 @@ rev = "44.257.8"
 hooks = [
   { id = "renovate-config-validator" },
 ]
+
+[[repos]]
+repo = "https://github.com/rhysd/actionlint"
+rev = "v1.7.12"
+hooks = [
+  { id = "actionlint" },
+]
+
+[[repos]]
+repo = "https://github.com/zizmorcore/zizmor-pre-commit"
+rev = "v1.32.0"
+hooks = [
+  # --offline: no GitHub token needed locally or in the pre-commit CI job.
+  { id = "zizmor", args = ["--no-progress", "--offline"] },
+]

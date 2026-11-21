@@ -1,0 +1,9 @@
+# zizmor configuration (https://docs.zizmor.sh/configuration/). Every suppression
+# needs a reason.
+rules:
+  self-repository:
+    # Wants `uses: $/.github/actions/...` (GitHub, July 2026) instead of `./...`.
+    # actionlint 1.7.12 rejects `$/` as an invalid action reference, so the two
+    # linters conflict. Re-enable once actionlint supports it:
+    # https://github.com/rhysd/actionlint/issues/711
+    disable: true

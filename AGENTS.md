@@ -20,6 +20,7 @@
   - GitHub Actions are pinned to a full commit SHA with a `# vX.Y.Z` comment.
   - Tool versions in workflows use a `version: X # datasource/depName` comment, and `go install` lines in `Taskfile.yaml` use an exact `@vX.Y.Z`, so Renovate can track them (see `renovate.json`'s `customManagers`). Follow the same patterns for anything new.
 - Workflows default to `permissions: contents: read`. Grant extra scopes per job, only where needed.
+- Workflows and actions are linted by actionlint and zizmor (prek hooks, also run in CI's `pre-commit` job). Fix findings; if one must be suppressed, do it in `.github/zizmor.yml` with a reason.
 - `golangci-lint` (v2, `.golangci.yml`) must pass. Don't silence a finding without a `//nolint:<linter> // <reason>` comment.
 
 ### Testing
